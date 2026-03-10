@@ -1,1 +1,117 @@
-teste
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoramento de semaforo </title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <header class="flex justify-between items-center mb-8 border-b border-gray-700 pb-4">
+            <h1 class="text-3xl font-bold flex items-center gap-2">
+                Sistema de Telemetria
+            </h1>
+            <div id="status" class="flex items-center gap-2 text-sm text-green-400">
+                <span class="relative flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                </span>
+                Monitorando em tempo real
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-gray-400 font-medium">Temperatura</span>
+                    <i data-lucide="thermometer" class="text-orange-500"></i>
+                </div>
+                <p class="text-4xl font-bold" id="card-temp">--°C</p>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-gray-400 font-medium">Umidade</span>
+                    <i data-lucide="droplets" class="text-blue-500"></i>
+                </div>
+                <p class="text-4xl font-bold" id="card-umi">--%</p>
+            </div>
+
+            <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-gray-400 font-medium">Luminosidade</span>
+                    <i data-lucide="sun" class="text-yellow-400"></i>
+                </div>
+                <p class="text-4xl font-bold" id="card-luz">-- lx</p>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-xl font-semibold">Histórico de Dados</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-gray-750 text-gray-400 text-sm uppercase">
+                        <tr>
+                            <th class="px-6 py-4">ID</th>
+                            <th class="px-6 py-4">Data/Hora</th>
+                            <th class="px-6 py-4">Status</th>
+                            </tr>
+                    </thead>
+                    <tbody id="tabela-corpo">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000/api/infracoes";
+
+        async function fetchDados() {
+            try {
+                const response = await fetch(API_URL);
+                const result = await response.json();
+                const dados = result.dados;
+
+                if (dados && dados.length > 0) {
+                    const ultimoDado = dados[dados.length - 1];
+                    
+                    document.getElementById('card-temp').innerText = `${ultimoDado.temperatura}°C`;
+                    document.getElementById('card-umi').innerText = `${ultimoDado.umidade}%`;
+                    document.getElementById('card-luz').innerText = `${ultimoDado.luminosidade} lx`;
+
+                    const tabela = document.getElementById('tabela-corpo');
+                    tabela.innerHTML = "";
+
+                    dados.reverse().slice(0, 10).forEach(item => {
+                        const isViolated = item.infracao == 1;
+                        tabela.innerHTML += `
+                            <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors">
+                                <td class="px-6 py-4">#${item.id}</td>
+                                <td class="px-6 py-4 text-gray-300">${item.timestamp}</td>
+                                <td class="px-6 py-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ${isViolated ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}">
+                                        ${isViolated ? 'INFRAÇÃO' : 'NORMAL'}
+                                    </span>
+                                </td>
+                                </tr>
+                        `;
+                    });
+                    lucide.createIcons();
+                }
+            } catch (error) {
+                console.error("Erro ao buscar dados:", error);
+            }
+        }
+
+        fetchDados();
+        setInterval(fetchDados, 3000);
+        lucide.createIcons();
+    </script>
+</body>
+</html>
