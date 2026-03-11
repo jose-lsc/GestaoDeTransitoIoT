@@ -58,7 +58,7 @@
                     <thead class="bg-gray-750 text-gray-400 text-sm uppercase">
                         <tr>
                             <th class="px-6 py-4">ID</th>
-                            <th class="px-6 py-4">Data/Hora</th>
+                            <th class="px-6 py-4">TimeStamp</th>
                             <th class="px-6 py-4">Status</th>
                             </tr>
                     </thead>
@@ -70,7 +70,7 @@
     </div>
 
     <script>
-        const API_URL = "http://localhost:3000/api/infracoes";
+        const API_URL = "https://laughing-space-zebra-69wxv4pjppxh4rw-3000.app.github.dev/api/infracoes";
 
         async function fetchDados() {
             try {
@@ -88,7 +88,7 @@
                     const tabela = document.getElementById('tabela-corpo');
                     tabela.innerHTML = "";
 
-                    dados.reverse().slice(0, 10).forEach(item => {
+                    dados.reverse().slice(0, 100).forEach(item => {
                         const isViolated = item.infracao == 1;
                         tabela.innerHTML += `
                             <tr class="border-b border-gray-700 hover:bg-gray-750 transition-colors">
